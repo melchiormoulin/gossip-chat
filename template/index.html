@@ -1,0 +1,65 @@
+{{define "js"}}
+{{$wsuri := .}}
+
+<html>
+<head>
+
+    <link type="text/css" rel="stylesheet" href="/static/style.css"/>
+
+</head>
+<body>
+<script type="text/javascript">
+    function appendMessage(msg) {
+        let myp = document.createElement('p')
+        myp.innerText = msg
+        document.getElementById('chatbox').appendChild(myp)
+    }
+
+    window.onload = function () {
+        connect()
+    }
+
+    function connect() {
+        let wsuri = {{$wsuri}}
+        let sock = new WebSocket(wsuri);
+
+        sock.onopen = function () {
+            console.log("connected to " + wsuri);
+        }
+
+        sock.onclose = function (e) {
+            console.log("connection closed (" + e.code + ")");
+        }
+
+        sock.onmessage = function (e) {
+            console.log("message received: " + e.data);
+            appendMessage(e.data)
+        }
+        sock.onerror = function () {
+            console.log("error websocket");
+        }
+        let sendMessageButton = document.getElementById('sendMessageButton')
+        sendMessageButton.onclick = function () {
+            let msgText = document.getElementById('message')
+            var msg = msgText.value
+            let pseudo = document.getElementById('pseudo').value
+            let sendMessage = pseudo + " : " + msg
+            sock.send(sendMessage);
+        }
+
+    }
+</script>
+<h1>Gossip chat</h1>
+
+<div id="chatbox"></div>
+<div id="sendMessage">
+    <input id="pseudo" type="text" value="John doe">
+    <input id="message" type="text" value="Hello, folks!">
+    <button id="sendMessageButton">Send Message</button>
+</div>
+
+</body>
+</html>
+
+
+{{end}}
